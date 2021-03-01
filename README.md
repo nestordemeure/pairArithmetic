@@ -16,8 +16,8 @@ We provide compensated numbers that can be cast from and to IEEE-754 types (such
 
 using Pdouble = CompensatedNumber<double>;
 
-double x = 1e100;
-Pdouble y = 1.0;
+const double x = 1e100;
+const Pdouble y = 1.0;
 
 // you can mix double and Pdouble in your computations
 // the error will be compensated as long as one argument of the operations is a Pdouble
@@ -27,9 +27,9 @@ Pdouble z = x + y;
 z -= 1e100;
 
 // cast back to double in order to get the compensated, improved-precision, result
-double z_corrected = (double)z; // 1.0
+const double z_corrected = static_cast<double>(z); // 1.0
 ```
 
-*Note:* our numbers implement additions and multiplications (and the associated in-place operations) but not divisions.
+**Note:** our numbers implement additions and multiplications (and the associated in-place operations) *but not divisions*.
 Do not hesitate to add an issue if you need this operation as it would be easy to fix.
 
