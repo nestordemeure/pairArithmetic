@@ -3,7 +3,7 @@
 A very simple, *header only*, implementation of pair arithmetic (see [Faithfully Rounded Floating-point Computations](https://dl.acm.org/doi/10.1145/3290955)).
 Destined to be used when a C++ program needs a local boost in accuracy but cannot easily be refactored to be more numerically stable.
 
-## Instalation
+## Install
 
 To use this library, you just need to drop the `PairArithmetic` folder in your program.
 
