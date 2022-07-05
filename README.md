@@ -1,6 +1,6 @@
 # Pair Arithmetic
 
-A very simple, *header only*, implementation of pair arithmetic (see [Faithfully Rounded Floating-point Computations](https://dl.acm.org/doi/10.1145/3290955)).
+A very simple, *header-only*, implementation of pair arithmetic (see [Faithfully Rounded Floating-point Computations](https://dl.acm.org/doi/10.1145/3290955)).
 Destined to be used when a C++ program needs a local boost in accuracy but cannot easily be refactored to be more numerically stable.
 
 ## Install
@@ -30,6 +30,5 @@ z -= 1e100;
 const double z_corrected = static_cast<double>(z); // 1.0
 ```
 
-**Note:** our numbers implement additions and multiplications (and the associated in-place operations) *but not divisions*.
-Do not hesitate to add an issue if you need this operation as it would be easy to fix.
-
+**Note:** our numbers implement additions, multiplications and divisions (plus the associated in-place operations) but not the square root nor the division on complex numbers.
+Do not hesitate to add an issue if you are missing one of these operations as it would be easy to fix.
