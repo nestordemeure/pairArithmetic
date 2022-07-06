@@ -33,7 +33,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// arithmetic operators
+// IN-PLACE OPERATIONS
 
 // +=
 template <typename T>
@@ -140,15 +140,8 @@ CompensatedNumber<T> &CompensatedNumber<T>::operator/=(const T &n)
     return *this;
 }
 
-// unary -
-template <typename T>
-const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n)
-{
-    T result = -n.number;
-    T newError = -n.error;
-
-    return CompensatedNumber<T>(result, newError);
-};
+//-----------------------------------------------------------------------------
+// ADDITION
 
 // +
 template <typename T>
@@ -186,6 +179,19 @@ const CompensatedNumber<T> operator+(const CompensatedNumber<T> &n1, const T &n2
     return CompensatedNumber<T>(result, newError);
 };
 
+//-----------------------------------------------------------------------------
+// SUBTRACTION
+
+// unary -
+template <typename T>
+const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n)
+{
+    T result = -n.number;
+    T newError = -n.error;
+
+    return CompensatedNumber<T>(result, newError);
+};
+
 // -
 template <typename T>
 const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n1, const CompensatedNumber<T> &n2)
@@ -197,6 +203,33 @@ const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n1, const Compe
 
     return CompensatedNumber<T>(result, newError);
 };
+
+// - (first member is a T)
+template <typename T>
+const CompensatedNumber<T> operator-(const T &n1, const CompensatedNumber<T> &n2)
+{
+    T result = n1 - n2.number;
+
+    T remainder = Eft::TwoSum(n1, -n2.number, result);
+    T newError = remainder - n2.error;
+
+    return CompensatedNumber<T>(result, newError);
+};
+
+// - (second member is a T)
+template <typename T>
+const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n1, const T &n2)
+{
+    T result = n1.number - n2;
+
+    T remainder = Eft::TwoSum(n1.number, -n2, result);
+    T newError = remainder + n1.error;
+
+    return CompensatedNumber<T>(result, newError);
+};
+
+//-----------------------------------------------------------------------------
+// MULTIPLICATION
 
 // *
 // note : we ignore second order terms
@@ -234,6 +267,9 @@ const CompensatedNumber<T> operator*(const CompensatedNumber<T> &n1, const T &n2
 
     return CompensatedNumber<T>(result, newError);
 };
+
+//-----------------------------------------------------------------------------
+// DIVISION
 
 // /
 template <typename T>
