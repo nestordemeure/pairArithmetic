@@ -27,10 +27,11 @@ public:
     CompensatedComplex &operator+=(const CompensatedComplex &n);
     CompensatedComplex &operator-=(const CompensatedComplex &n);
     CompensatedComplex &operator*=(const CompensatedComplex &n);
+    CompensatedComplex &operator/=(const CompensatedComplex &n);
 };
 
 //-----------------------------------------------------------------------------
-// IN-PLACE OPERATIONS
+// ADDITION
 
 // +=
 template <typename T>
@@ -40,28 +41,6 @@ CompensatedComplex<T> &CompensatedComplex<T>::operator+=(const CompensatedComple
     imag += n.imag;
     return *this;
 };
-
-// -=
-template <typename T>
-CompensatedComplex<T> &CompensatedComplex<T>::operator-=(const CompensatedComplex<T> &n)
-{
-    real -= n.real;
-    imag -= n.imag;
-    return *this;
-};
-
-// *=
-template <typename T>
-CompensatedComplex<T> &CompensatedComplex<T>::operator*=(const CompensatedComplex<T> &n)
-{
-    const CompensatedNumber<T> real_temp = real;
-    real = real * n.real - imag * n.imag;
-    imag = imag * n.real + real_temp * n.imag;
-    return *this;
-}
-
-//-----------------------------------------------------------------------------
-// ADDITION
 
 // +
 template <typename T>
@@ -101,6 +80,15 @@ const CompensatedComplex<T> operator+(const CompensatedComplex<T> &n1, const std
 //-----------------------------------------------------------------------------
 // SUBTRACTION
 
+// -=
+template <typename T>
+CompensatedComplex<T> &CompensatedComplex<T>::operator-=(const CompensatedComplex<T> &n)
+{
+    real -= n.real;
+    imag -= n.imag;
+    return *this;
+};
+
 // unary -
 template <typename T>
 const CompensatedComplex<T> operator-(const CompensatedComplex<T> &n)
@@ -131,7 +119,7 @@ const CompensatedComplex<T> operator-(const CompensatedComplex<T> &n1, const T &
 
 // - (first member is a complex<T>)
 template <typename T>
-const CompensatedComplex<T> operator(const std::complex<T> &n1, const CompensatedComplex<T> &n2)
+const CompensatedComplex<T> operator-(const std::complex<T> &n1, const CompensatedComplex<T> &n2)
 {
     return CompensatedComplex<T>(n1.real() - n2.real, n1.imag() - n2.imag);
 };
@@ -145,6 +133,16 @@ const CompensatedComplex<T> operator-(const CompensatedComplex<T> &n1, const std
 
 //-----------------------------------------------------------------------------
 // MULTIPLICATION
+
+// *=
+template <typename T>
+CompensatedComplex<T> &CompensatedComplex<T>::operator*=(const CompensatedComplex<T> &n)
+{
+    const CompensatedNumber<T> real_temp = real;
+    real = real * n.real - imag * n.imag;
+    imag = imag * n.real + real_temp * n.imag;
+    return *this;
+}
 
 // *
 // note : we ignore second order terms
@@ -180,4 +178,61 @@ template <typename T>
 const CompensatedComplex<T> operator*(const CompensatedComplex<T> &n1, const std::complex<T> &n2)
 {
     return CompensatedComplex<T>(n1.real * n2.real() - n1.imag * n2.imag(), n1.imag * n2.real() + n1.real * n2.imag());
+};
+
+//-----------------------------------------------------------------------------
+// DIVISION
+
+// /=
+// Uses a [complex division algorithm](https://arxiv.org/pdf/1210.4539.pdf) picked to:
+// - mitigate overflows/underflows (common with the naive algorithm),
+// - avoid using an FMA (unpractical with Pair arithmetic).
+// NOTE: one could probably design a better algorithm by dropping at the (number,error) level
+template <typename T>
+CompensatedComplex<T> &CompensatedComplex<T>::operator/=(const CompensatedComplex<T> &n)
+{
+    if (std::abs(static_cast<T>(n.imag)) <= std::abs(static_cast<T>(n.real)))
+    {
+        const CompensatedNumber<T> ratio = n.imag / n.real;
+        const CompensatedNumber<T> denom = n.real + n.imag * ratio;
+        real = (real + imag * ratio) / denom;
+        imag = (imag - real * ratio) / denom;
+    }
+    else
+    {
+        const CompensatedNumber<T> ratio = n.real / n.imag;
+        const CompensatedNumber<T> denom = n.real * ratio + n.imag;
+        real = (real * ratio + imag) / denom;
+        imag = (imag * ratio - real) / denom;
+    }
+
+    return *this;
+}
+
+// /
+// Uses a [complex division algorithm](https://arxiv.org/pdf/1210.4539.pdf) picked to:
+// - mitigate overflows/underflows (common with the naive algorithm),
+// - avoid using an FMA (unpractical with Pair arithmetic).
+// NOTE: one could probably design a better algorithm by dropping at the (number,error) level
+template <typename T>
+const CompensatedComplex<T> operator/(const CompensatedComplex<T> &n1, const CompensatedComplex<T> &n2)
+{
+    if (std::abs(static_cast<T>(n2.imag)) <= std::abs(static_cast<T>(n2.real)))
+    {
+        const CompensatedNumber<T> n2Ratio = n2.imag / n2.real;
+        const CompensatedNumber<T> denom = n2.real + n2.imag * n2Ratio;
+        const CompensatedNumber<T> re = (n1.real + n1.imag * n2Ratio) / denom;
+        const CompensatedNumber<T> im = (n1.imag - n1.real * n2Ratio) / denom;
+
+        return CompensatedComplex<T>(re, im);
+    }
+    else
+    {
+        const CompensatedNumber<T> n2Ratio = n2.real / n2.imag;
+        const CompensatedNumber<T> denom = n2.real * n2Ratio + n2.imag;
+        const CompensatedNumber<T> re = (n1.real * n2Ratio + n1.imag) / denom;
+        const CompensatedNumber<T> im = (n1.imag * n2Ratio - n1.real) / denom;
+
+        return CompensatedComplex<T>(re, im);
+    }
 };

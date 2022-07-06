@@ -30,5 +30,13 @@ z -= 1e100;
 const double z_corrected = static_cast<double>(z); // 1.0
 ```
 
-**Note:** our numbers implement additions, multiplications and divisions (plus the associated in-place operations) but not the square root nor the division on complex numbers.
-Do not hesitate to add an issue if you are missing one of these operations as it would be easy to fix.
+## Potential improvements
+
+We do not implement the following operations:
+
+* some constructors,
+* boolean operations,
+* the square root of a real number,
+* some complex operations.
+
+Feel free to request them (or submit a PR adding them), they should be fairly easy to implement.

@@ -33,7 +33,7 @@ public:
 };
 
 //-----------------------------------------------------------------------------
-// IN-PLACE OPERATIONS
+// ADDITION
 
 // +=
 template <typename T>
@@ -60,88 +60,6 @@ CompensatedNumber<T> &CompensatedNumber<T>::operator+=(const T &n)
 
     return *this;
 };
-
-// -=
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator-=(const CompensatedNumber<T> &n)
-{
-    T result = number - n.number;
-    T remainder = Eft::TwoSum(number, -n.number, result);
-
-    number = result;
-    error += remainder + n.error;
-
-    return *this;
-};
-
-// -= (second member is a T)
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator-=(const T &n)
-{
-    T result = number - n;
-    T remainder = Eft::TwoSum(number, -n, result);
-
-    number = result;
-    error += remainder;
-
-    return *this;
-};
-
-// *=
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator*=(const CompensatedNumber<T> &n)
-{
-    T result = number * n.number;
-    T remainder = Eft::FastTwoProd(number, n.number, result);
-
-    error = n.number * error + remainder + number * n.error;
-    number = result;
-
-    return *this;
-}
-
-// *= (second member is a T)
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator*=(const T &n)
-{
-    T result = number * n;
-    T remainder = Eft::FastTwoProd(number, n, result);
-
-    error = n * error + remainder;
-    number = result;
-
-    return *this;
-}
-
-// /=
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator/=(const CompensatedNumber<T> &n)
-{
-    T result = number / n.number;
-    T remainder = Eft::RemainderDiv(number, n.number, result);
-
-    T nPrecise = n.number + n.error;
-    error = ((remainder + error) - result * n.error) / n2Precise;
-    number = result;
-
-    return *this;
-}
-
-// /= (second member is a T)
-template <typename T>
-CompensatedNumber<T> &CompensatedNumber<T>::operator/=(const T &n)
-{
-    T result = number / n;
-    T remainder = Eft::RemainderDiv(number, n, result);
-
-    error = (remainder + error) / n;
-    number = result;
-
-    return *this;
-}
-
-//-----------------------------------------------------------------------------
-// ADDITION
 
 // +
 template <typename T>
@@ -181,6 +99,32 @@ const CompensatedNumber<T> operator+(const CompensatedNumber<T> &n1, const T &n2
 
 //-----------------------------------------------------------------------------
 // SUBTRACTION
+
+// -=
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator-=(const CompensatedNumber<T> &n)
+{
+    T result = number - n.number;
+    T remainder = Eft::TwoSum(number, -n.number, result);
+
+    number = result;
+    error += remainder + n.error;
+
+    return *this;
+};
+
+// -= (second member is a T)
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator-=(const T &n)
+{
+    T result = number - n;
+    T remainder = Eft::TwoSum(number, -n, result);
+
+    number = result;
+    error += remainder;
+
+    return *this;
+};
 
 // unary -
 template <typename T>
@@ -231,6 +175,32 @@ const CompensatedNumber<T> operator-(const CompensatedNumber<T> &n1, const T &n2
 //-----------------------------------------------------------------------------
 // MULTIPLICATION
 
+// *=
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator*=(const CompensatedNumber<T> &n)
+{
+    T result = number * n.number;
+    T remainder = Eft::FastTwoProd(number, n.number, result);
+
+    error = n.number * error + remainder + number * n.error;
+    number = result;
+
+    return *this;
+}
+
+// *= (second member is a T)
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator*=(const T &n)
+{
+    T result = number * n;
+    T remainder = Eft::FastTwoProd(number, n, result);
+
+    error = n * error + remainder;
+    number = result;
+
+    return *this;
+}
+
 // *
 // note : we ignore second order terms
 template <typename T>
@@ -270,6 +240,33 @@ const CompensatedNumber<T> operator*(const CompensatedNumber<T> &n1, const T &n2
 
 //-----------------------------------------------------------------------------
 // DIVISION
+
+// /=
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator/=(const CompensatedNumber<T> &n)
+{
+    T result = number / n.number;
+    T remainder = Eft::RemainderDiv(number, n.number, result);
+
+    T nPrecise = n.number + n.error;
+    error = ((remainder + error) - result * n.error) / n2Precise;
+    number = result;
+
+    return *this;
+}
+
+// /= (second member is a T)
+template <typename T>
+CompensatedNumber<T> &CompensatedNumber<T>::operator/=(const T &n)
+{
+    T result = number / n;
+    T remainder = Eft::RemainderDiv(number, n, result);
+
+    error = (remainder + error) / n;
+    number = result;
+
+    return *this;
+}
 
 // /
 template <typename T>
